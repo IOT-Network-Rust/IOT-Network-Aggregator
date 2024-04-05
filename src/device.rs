@@ -5,7 +5,7 @@ use std::net::{TcpListener, TcpStream};
 /// Represents an IoT Device.
 struct IotDevice {
     name: String,
-    location: Option<String>, // Where it is located so that you don't lose it
+    location: String, // Where it is located so that you don't lose it
     listener: TcpListener,
 
     sensors: Vec<Sensor>,
