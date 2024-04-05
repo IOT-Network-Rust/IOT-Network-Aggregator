@@ -29,3 +29,9 @@ their data in a database to visualize later
 ## Usage
 
 Explain how to use your project. Provide examples and usage scenarios. Include code snippets and command-line examples.
+
+## Contributing
+
+- [ ] Liam Israel ~ Larmbs
+
+## License
