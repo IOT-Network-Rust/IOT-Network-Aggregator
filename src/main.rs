@@ -1,6 +1,7 @@
 #![allow(unused)]
 mod devices;
 use devices::{devices::IotDevice, inputs::Input, sensors::Sensor};
+use rusqlite::{Connection};
 
 fn main() {
     println!("Hello, world!");
