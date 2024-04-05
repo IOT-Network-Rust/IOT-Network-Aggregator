@@ -1,1 +1,1 @@
-C:\Users\Admin\Desktop\iot_network\target\debug\iot_network.exe: C:\Users\Admin\Desktop\iot_network\src\main.rs
+C:\Users\Admin\Desktop\iot_network\target\debug\iot_network.exe: C:\Users\Admin\Desktop\iot_network\src\devices\devices.rs C:\Users\Admin\Desktop\iot_network\src\devices\inputs.rs C:\Users\Admin\Desktop\iot_network\src\devices\mod.rs C:\Users\Admin\Desktop\iot_network\src\devices\sensors.rs C:\Users\Admin\Desktop\iot_network\src\main.rs

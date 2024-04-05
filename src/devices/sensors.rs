@@ -1,3 +1,4 @@
+#![allow(unused)]
 use rusqlite::Connection;
 
 /// Represents a sensor.
@@ -7,5 +8,7 @@ pub struct Sensor {
 }
 
 impl Sensor {
-    
+    pub fn new(label: String, database: Connection) -> Self {
+        Sensor { label, database }
+    }
 }

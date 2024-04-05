@@ -1,4 +1,5 @@
+#![allow(unused)]
 pub mod devices;
 
-pub mod sensors;
 pub mod inputs;
+pub mod sensors;

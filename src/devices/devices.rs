@@ -1,8 +1,9 @@
+#![allow(unused)]
+
+use super::inputs::Input;
+use super::sensors::Sensor;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
-use super::sensors::Sensor;
-use super::inputs::Input;
-
 
 /// Represents an IoT Device.
 pub struct IotDevice {
