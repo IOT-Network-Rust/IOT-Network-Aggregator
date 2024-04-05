@@ -1,7 +1,34 @@
 ## Messaging Protocol
+
 The protocol that will be the only one supported currently will be TCP
 TCP offers a lot of safety as it almost guarantees data arrival with a simple
 interface for most systems.
+
+
+## Handshake
+
+At the start of any conversation, you must greet the recipient you are talking to
+and they must reply with their response.
+
+When this happens we want to exchange some important information about 
+both of our systems so we can properly understand each other.
+
+When this server requests to connect to the IOT device it will send along with it
+some information 
+```Example
+    Time
+```
+and in return, the device will send some of its data
+```Example
+    Name, Location, Sensors(with typing), Inputs(with typing)
+```
+
+The server is the only one who can request a connection with an IOT device.
+The IOT device will not know the server and just will be listening for a 
+socket connection from the server.
+
+
+## Messaging
 
 For this messaging system, we will be using a "send and receive" format
 where for every message sent a reply is required from the other 
@@ -34,6 +61,7 @@ responding to data requires these steps:
 
 This functionality needs to be present in both the IOT device and 
 in this server.
+
 
 ## Message Structure
 
