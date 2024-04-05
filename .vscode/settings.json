@@ -1,5 +1,8 @@
 {
     "cSpell.words": [
         "rusqlite"
+    ],
+    "rust-analyzer.linkedProjects": [
+        ".\\Cargo.toml"
     ]
 }
