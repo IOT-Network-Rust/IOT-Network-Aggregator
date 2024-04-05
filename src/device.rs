@@ -1,32 +1,19 @@
+use std::io::{Read, Write};
 use std::net::{IpAddr, Ipv4Addr};
-
-/// Represents a Socket Address, consisting of an IP address and a port number.
-/// 
-/// # Examples
-/// 
-/// ```
-/// use std::net::{IpAddr, Ipv4Addr};
-/// let socket_addr = SocketAddr {
-///     ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
-///     port: 5000,
-/// };
-/// ```
-struct SocketAddr {
-    ip: IpAddr,
-    port: u16,
-}
+use std::net::{TcpListener, TcpStream};
 
 /// Represents an IoT Device.
 struct IotDevice {
     name: String,
     location: Option<String>, // Where it is located so that you don't lose it
-    addr: SocketAddr,
+    listener: TcpListener,
+
     sensors: Vec<Sensor>,
     inputs: Vec<Input>,
 }
 
 /// Represents a sensor.
-struct Sensor { 
+struct Sensor {
     label: String, // What does the data represent
 }
 
@@ -46,26 +33,26 @@ impl IotDevice {
         self.inputs.push(input);
     }
 
-    /// Constructs a new `IotDevice`.
-    fn new(name: String, location: Option<String>, addr: SocketAddr) -> IotDevice {
-        IotDevice {
-            name, 
+    /// Sends through TCP connection
+    fn send(&self, stream: &mut TcpStream, data: &[u8]) -> std::io::Result<usize> {
+        stream.write(data)
+    }
+
+    /// Creates IotDevice
+    /// if unable to connect throws error
+    ///
+    fn listen(name: String, location: String, address: &str) -> std::io::Result<Self> {
+        let listener = TcpListener::bind(address)?;
+        Ok(IotDevice {
+            name,
             location,
-            addr,
+            listener,
             sensors: Vec::new(),
             inputs: Vec::new(),
-        }
+        })
     }
 
-    fn send() {
-
-    }
-
-    fn listen() {
-
-    }
-
-    fn accept() {
-
+    fn accept(&self) -> std::io::Result<TcpStream> {
+        self.listener.accept().map(|(stream, _)| stream)
     }
 }
