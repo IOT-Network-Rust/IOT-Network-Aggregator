@@ -2,6 +2,7 @@
 
 mod inputs;
 mod sensors;
+mod db;
 
 use std::io::{Read, Write};
 use std::io;
