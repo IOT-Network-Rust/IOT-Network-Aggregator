@@ -55,10 +55,7 @@ pub fn listen(ip: String, port: usize) -> io::Result<()> {
 
 
     // Joining threads to the main thread
-    println!("Shutting Down Server...");
-    for handle in handles {
-        handle.join().unwrap();
-    }
+    shutdown_server(handles);
 
     Ok(())
 }
@@ -71,8 +68,15 @@ pub fn handle_request(mut stream: TcpStream) {
 
     // Turns buffer data into string but handles messy data
     let request = String::from_utf8_lossy(&buffer[..]);
-    println!("Received Request");
+    println!("Received Request {request}");
 
     let response = "Hello, Client".as_bytes();
     stream.write(response).expect("Failed To Respond");
+}
+
+fn shutdown_server(handles: Vec<thread::JoinHandle<()>>) {
+    println!("Shutting Down Server...");
+    for handle in handles {
+        handle.join().unwrap();
+    }
 }

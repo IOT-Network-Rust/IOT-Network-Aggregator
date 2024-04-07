@@ -7,3 +7,15 @@ edition = "2021"
 
 [dependencies]
 rusqlite = { version = "0.31.0", features = ["bundled"] }
+
+[package.metadata]
+# Specify files to ignore using glob patterns
+# For example, ignore compiled files and directories
+gitignore = [
+    "target/",
+    "*.rs.bk",
+    "*.swp",
+    "*.d",
+    "*.o",
+    "*.rmeta",
+]
