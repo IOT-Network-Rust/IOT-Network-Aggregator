@@ -1,12 +1,12 @@
 #![allow(unused)]
 mod devices;
-use devices::{devices::IotDevice, inputs::Input, sensors::Sensor};
+mod server;
 use rusqlite::{Connection};
 
-fn main() {
-    println!("Hello, world!");
 
-    let device_name = String::from("Solar Camera");
-    let device_location = String::from("Outside On The Front Lawn");
-    let device = IotDevice::listen(device_name, device_location, "0.0.0.0:8000");
+const IP_ADDR:&str = "127.0.0.1";
+const PORT:usize = 8080;
+
+fn main() {
+    server::listen(IP_ADDR.to_string(), PORT).expect("There Was A Problem Creating The Server");
 }

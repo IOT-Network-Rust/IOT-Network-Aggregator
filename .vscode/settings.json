@@ -3,6 +3,9 @@
         "rusqlite"
     ],
     "rust-analyzer.linkedProjects": [
+        ".\\Cargo.toml",
+        ".\\Cargo.toml",
+        ".\\Cargo.toml",
         ".\\Cargo.toml"
     ],
     "grammarly.selectors": [
