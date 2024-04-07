@@ -85,7 +85,28 @@ Boolean
 This means that devices must be listening often for external input and must also notify the server of this ability of theirs
 
 
+## Messages
+When communicating there is a certain set of messages that both the IOT device and server must be able to send and receive
+
+- [] Ping (Checks if recipient is awake)
+- [] Update DataBase (Adds a new value to specified database table)
+- [] Response (Responds to some request)
+- [] 
+ 
+
+Message length (How long the message will be)
+2 bytes
+
+Message Type (Specifies what type of message it expects)
+2 bytes
+
+The rest of the bytes are allocated to data
+Total bytes - 2 bytes - 2 bytes
+
+
 ## Message Structure
+Messages are used to transfer data between devices.
+Messages must be properly structured to relay data appropriately.
 
 
 

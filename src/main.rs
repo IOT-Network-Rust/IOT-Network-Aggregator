@@ -1,6 +1,8 @@
 #![allow(unused)]
 mod devices;
 mod server;
+mod database;
+
 use rusqlite::{Connection};
 
 

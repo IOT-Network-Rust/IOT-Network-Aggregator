@@ -1,17 +1,16 @@
 #![allow(unused)]
 
-use rusqlite::{Connection, Result};
+pub use rusqlite::{Connection, Result};
 use std::fs;
 
 
-struct IotDataBase {
-    name: String,
+pub struct IotDataBase {
     tables: Vec<String>,
     db_conn: Connection,
 }
 
 impl IotDataBase {
-    pub fn new(device_name: String, db_path: String) -> Result<Self> { // Can Fail must unwrap
+    pub fn open(db_path: String) -> Result<Self> { // Can Fail must unwrap
         // Check if database already exists for device
         if fs::metadata(&db_path).is_ok() {
             //Return object based off this db
@@ -24,7 +23,6 @@ impl IotDataBase {
         
         // Returns data base object
         Ok(IotDataBase {
-            name: device_name,
             tables: Vec::new(),
             db_conn: conn,
         })

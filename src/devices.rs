@@ -2,17 +2,28 @@
 
 mod inputs;
 mod sensors;
-mod db;
 
 use std::io::{Read, Write};
 use std::io;
 use std::net::{TcpListener, TcpStream};
 
+use crate::database;
+
 /// Represents an IoT Device.
 pub struct IotDevice {
     name: String,
-    location: String, // Where it is located so that you don't lose it
+    id: u32,
+    database:database::IotDataBase,
+}
 
-    sensors: Vec<sensors::Sensor>,
-    inputs: Vec<inputs::Input>,
+impl IotDevice {
+    pub fn new(name:String, id:u32) -> database::Result<Self> {
+        let db_path = format!("{name}:{id}.db");
+        let database = database::IotDataBase::open(db_path)?;
+        Ok(IotDevice {
+            name, 
+            id,
+            database,
+        })
+    }
 }
