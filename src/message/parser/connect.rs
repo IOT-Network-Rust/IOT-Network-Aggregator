@@ -1,39 +1,24 @@
 use rusqlite::ffi::Error;
 use serde_derive::{Deserialize, Serialize};
 use serde_json;
+use crate::database::types;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub enum OutputType {
-    Integer,
-    Float,
-    Boolean,
-    Photo,
-    Audio,
-    Video,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum InputType {
-    Integer,
-    Float,
-    Boolean,
-}
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Sensor {
-    label: String,
-    data_type: OutputType,
+    pub label: String,
+    pub data_type: types::OutputType,
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Input {
-    label: String,
-    data_type: InputType,
+    pub label: String,
+    pub data_type: types::InputType,
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConnectMSG {
-    name: String,
-    id: String,
-    sensors: Vec<Sensor>,
-    inputs: Vec<Input>,
+    pub name: String,
+    pub id: String,
+    pub sensors: Vec<Sensor>,
+    pub inputs: Vec<Input>,
 }
 
 pub fn parse_connect(s: &str) -> serde_json::Result<ConnectMSG> {

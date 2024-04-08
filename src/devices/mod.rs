@@ -17,9 +17,5 @@ pub struct IotDevice {
 }
 
 impl IotDevice {
-    pub fn new(name: String, id: u32) -> database::Result<Self> {
-        let db_path = format!("{name}:{id}.db");
-        let database = database::IotDataBase::open(db_path)?;
-        Ok(IotDevice { name, id, database })
-    }
+    
 }

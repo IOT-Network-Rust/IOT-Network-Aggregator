@@ -3,6 +3,7 @@
 pub use rusqlite::{Connection, Result};
 use std::fs;
 pub mod types;
+use crate::message::ConnectMSG;
 
 pub struct IotDataBase {
     tables: Vec<String>,
@@ -10,17 +11,12 @@ pub struct IotDataBase {
 }
 
 impl IotDataBase {
-    pub fn open(db_path: String) -> Result<Self> {
+    pub fn open(data: ConnectMSG) -> Result<Self> {
+        let file_name = format!("{}{}.db", data.name, data.id);
         // Can Fail must unwrap
         // Check if database already exists for device
-        if fs::metadata(&db_path).is_ok() {
-            //Return object based off this db
-            // But checks if the dbs match table wise and checks
-            // for conflicts
-        } else {
-            // Else make db based off device sent data
-        }
-        let conn = Connection::open(db_path)?;
+        
+        let conn = Connection::open(file_name)?;
 
         // Returns data base object
         Ok(IotDataBase {
