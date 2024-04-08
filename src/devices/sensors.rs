@@ -5,6 +5,4 @@ pub struct Sensor {
     label: String, // What does the data represent
 }
 
-impl Sensor {
-
-}
+impl Sensor {}

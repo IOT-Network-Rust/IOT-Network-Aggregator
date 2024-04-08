@@ -2,7 +2,7 @@
 
 pub use rusqlite::{Connection, Result};
 use std::fs;
-
+pub mod types;
 
 pub struct IotDataBase {
     tables: Vec<String>,
@@ -10,7 +10,8 @@ pub struct IotDataBase {
 }
 
 impl IotDataBase {
-    pub fn open(db_path: String) -> Result<Self> { // Can Fail must unwrap
+    pub fn open(db_path: String) -> Result<Self> {
+        // Can Fail must unwrap
         // Check if database already exists for device
         if fs::metadata(&db_path).is_ok() {
             //Return object based off this db
@@ -20,7 +21,7 @@ impl IotDataBase {
             // Else make db based off device sent data
         }
         let conn = Connection::open(db_path)?;
-        
+
         // Returns data base object
         Ok(IotDataBase {
             tables: Vec::new(),
@@ -31,7 +32,6 @@ impl IotDataBase {
     pub fn write(&self, table: String, data: String) {
         // Checks if table exists
 
-        // Inputs data according to specified way 
-
+        // Inputs data according to specified way
     }
 }

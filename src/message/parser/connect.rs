@@ -1,4 +1,3 @@
-
 use rusqlite::ffi::Error;
 use serde_derive::{Deserialize, Serialize};
 use serde_json;
@@ -30,14 +29,13 @@ pub struct Input {
     data_type: InputType,
 }
 #[derive(Serialize, Deserialize, Debug)]
-pub struct DeviceData {
+pub struct ConnectMSG {
     name: String,
     id: String,
     sensors: Vec<Sensor>,
     inputs: Vec<Input>,
 }
 
-
-pub fn parse_device_profile(s:&str) -> serde_json::Result<DeviceData> {
+pub fn parse_connect(s: &str) -> serde_json::Result<ConnectMSG> {
     serde_json::from_str(s)
 }

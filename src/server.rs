@@ -6,8 +6,9 @@ use std::thread;
 
 use serde_derive::{Deserialize, Serialize};
 
-use crate::parser;
 use crate::devices;
+
+use crate::message::{self, Message};
 
 pub struct IotServer {
     ip: String,
@@ -56,11 +57,11 @@ impl IotServer {
             .expect("Failed To Read From Client"); // Reads stream data then puts it into the buffer
 
         // Turns buffer data into string but handles messy data
-        let request = String::from_utf8_lossy(&buffer[..]);
-        let split:Vec<&str> = request.split("|").collect();
+        let request = String::from_utf8_lossy(&buffer[..]).to_string();
+        let message = message::Message::parse(&request).expect("Could Not Process Message");
 
-        let parsed_json = parser::device_profile::parse_device_profile(&split.get(2).unwrap());
-        println!("Received Request {:?}", parsed_json);
+        println!("Request Type {}", message.as_ref());
+        println!("Request Data {}", message.get_data());
 
         let response = "Hello, Client".as_bytes();
         stream.write(response).expect("Failed To Respond");
