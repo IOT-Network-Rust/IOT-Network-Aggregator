@@ -1,1 +1,1 @@
-mod device_profile;
+pub mod device_profile;

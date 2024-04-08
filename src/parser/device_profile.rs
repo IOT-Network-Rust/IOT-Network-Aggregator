@@ -38,6 +38,6 @@ pub struct DeviceData {
 }
 
 
-pub fn parse_device_profile(s:&str) -> serde_json::Result<DeviceData>{
+pub fn parse_device_profile(s:&str) -> serde_json::Result<DeviceData> {
     serde_json::from_str(s)
 }

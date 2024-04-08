@@ -3,14 +3,14 @@ mod devices;
 mod server;
 mod database;
 mod parser;
+mod config;
 
 use rusqlite::{Connection};
 
 
-const IP_ADDR:&str = "127.0.0.1";
-const PORT:u32 = 8080;
 
 fn main() {
-    let mut iot_server = server::IotServer::open(IP_ADDR, PORT).expect("Failed to start server");
+    let conf = config::load_config();
+    let mut iot_server = server::IotServer::open(&conf.net.ip, conf.net.port).expect("Failed to start server");
     iot_server.start();
 }
