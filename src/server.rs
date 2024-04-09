@@ -8,7 +8,7 @@ use std::thread;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::devices;
-
+use crate::database;
 use crate::message::{self, Message};
 
 pub struct IotServer {
@@ -76,6 +76,10 @@ impl IotServer {
         }
         println!("Server Shut Down");
     }
+
+    async fn shutdown_signal() {
+        tokio::signal::ctrl_c().await.expect("Failed to listen for Ctrl+C");
+    }
 }
 
 struct DeviceConnection {
@@ -129,6 +133,14 @@ impl DeviceConnection {
 
     pub fn handle_request(&mut self, request: String) {
         let msg = message::Message::parse(&request.as_str()).unwrap();
-        println!("TYPE:{:?} DATA:{:?}", msg.as_ref(), msg.get_data());
+        match msg {
+            message::Message::UPDATE(entries) => {
+                self.device.update(entries);
+            },
+            _ => {
+                println!("TYPE:{:?} DATA:{:?}", msg.as_ref(), msg.get_data());
+            }
+        };
+        
     }
 }

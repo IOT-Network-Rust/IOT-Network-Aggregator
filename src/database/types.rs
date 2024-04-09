@@ -8,6 +8,8 @@ pub enum InputType {
     REAL,
 }
 
+#[derive(strum_macros::AsRefStr)]
+
 #[derive(Serialize, Deserialize, Debug)]
 
 pub enum OutputType {
