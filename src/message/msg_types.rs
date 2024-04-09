@@ -19,6 +19,7 @@ pub enum Message {
 
 impl Message {
     pub fn parse(string: &str) -> Option<Self> {
+
         let split:Vec<&str> = string.split("|").collect();
         let msg_type = *split.get(0)?;
         let data = *split.get(1)?;
@@ -35,7 +36,7 @@ impl Message {
                 let data = parse_connect(data).unwrap();
                 Some(Message::CONNECT(data))
             },
-            "Response" => {
+            "RESPONSE" => {
                 Some(Message::RESPONSE(data.to_string()))
             },
             _ => None
@@ -46,7 +47,7 @@ impl Message {
         match self {
             Message::PING => "None".to_string(),
             Message::CONNECT(data) => format!("{:?}", data),
-            Message::RESPONSE(data) => data.clone(),
+            Message::RESPONSE(data) => format!("{:?}", data),
             Message::UPDATE(data) => format!("{:?}", data),
             _ => "None".to_string(),
         }

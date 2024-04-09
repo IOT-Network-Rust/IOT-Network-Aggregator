@@ -3,7 +3,10 @@
 pub use rusqlite::{Connection, Result};
 use std::fs;
 use crate::message::ConnectMSG;
+use std::path;
 
+
+const DB_FOLDER:&str = "dbs";
 pub struct IotDataBase {
     tables: Vec<String>,
     db_conn: Connection,
@@ -11,8 +14,9 @@ pub struct IotDataBase {
 
 impl IotDataBase {
     pub fn open(data: &ConnectMSG) -> Self {
-        let file_name = format!("{}{}.db", data.name, data.id);
-        let conn = Connection::open(file_name).unwrap();
+        let binding = path::Path::new(DB_FOLDER).join(format!("{}{}.db", data.name, data.id));
+        let file_path = binding.to_str().unwrap();
+        let conn = Connection::open(file_path).unwrap();
         let mut sensor_labels = vec![];
         for sensor in &data.sensors {
             sensor_labels.push(sensor.label.clone());

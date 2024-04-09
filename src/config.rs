@@ -10,8 +10,14 @@ pub struct Net {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct DB {
+    pub folder: String
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub net: Net,
+    pub database: DB,
 }
 
 pub fn load_config() -> Config {

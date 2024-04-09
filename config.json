@@ -2,5 +2,8 @@
     "net":{
         "ip":"self",
         "port":8080
+    },
+    "database":{
+        "folder":"dbs"
     }
 }

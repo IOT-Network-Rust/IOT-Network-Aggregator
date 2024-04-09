@@ -1,6 +1,7 @@
 use std::io::{self, Read, Write};
 
 use std::net::{TcpListener, TcpStream};
+use std::os::windows::io::AsRawSocket;
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 
@@ -40,9 +41,10 @@ impl IotServer {
         for stream in self.listener.incoming() {
             match stream {
                 Err(_) => {}
-                Ok(mut ok_stream) => {
+                Ok(ok_stream) => {
                     let handle = thread::spawn(move || {
-                        IotServer::handle_request(ok_stream);
+                        let mut device =  DeviceConnection::new( ok_stream).unwrap();
+                        device.listen();
                     });
                     self.handles.push(handle);
                 }
@@ -83,10 +85,12 @@ struct DeviceConnection {
 impl DeviceConnection {
     pub fn new(mut stream: TcpStream) -> Result<Self, io::Error> {
         let mut buffer = [0; 1024];
-        stream.write("CONNECT".as_bytes());
-        let response = stream.read(&mut buffer).expect("Could Not Send Data").to_string();
-        let connect_msg = message::Message::parse(response.as_str()).unwrap();
+        //stream.write("CONNECT".as_bytes());
+        stream.read(&mut buffer).expect("Could Not Read Data");
 
+        let request = String::from_utf8_lossy(&buffer[..]).to_string();
+        let connect_msg = message::Message::parse(&request.as_str()).unwrap();
+        println!("{:?}", connect_msg);
         match connect_msg {
             message::Message::CONNECT(data) => {
                 let device = devices::IotDevice::new(&data);
@@ -108,9 +112,13 @@ impl DeviceConnection {
 
             // Waiting for Request from device
             match self.stream.read(&mut buffer) {
-                Ok(_) => {
-                    let request = String::from_utf8_lossy(&buffer[..]).to_string();
-                    self.handle_request(request);
+                Ok(n) => {
+                    if n > 0 {
+                        let request = String::from_utf8_lossy(&buffer[..]).to_string();
+                        self.handle_request(request);
+                    } else {
+                        continue;
+                    }
                 }
                 Err(_) => {
                     continue;
@@ -120,13 +128,7 @@ impl DeviceConnection {
     }
 
     pub fn handle_request(&mut self, request: String) {
-        let split: Vec<&str> = request.split("|").collect();
-        let len = split.get(0);
-    }
-
-    pub fn send(&mut self, string: String) {
-        let mut buffer = [0; 1024]; // Buffer size
-
-        self.stream.write_all(string.as_bytes());
+        let msg = message::Message::parse(&request.as_str()).unwrap();
+        println!("TYPE:{:?} DATA:{:?}", msg.as_ref(), msg.get_data());
     }
 }
