@@ -35,3 +35,5 @@ Explain how to use your project. Provide examples and usage scenarios. Include c
 - [ ] Liam Israel ~ Larmbs
 
 ## License
+
+MIT LICENSE

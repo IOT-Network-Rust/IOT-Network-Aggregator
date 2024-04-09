@@ -81,7 +81,26 @@ struct DeviceConnection {
     stream: TcpStream,
 }
 impl DeviceConnection {
-    pub fn start(stream: TcpStream) {}
+    pub fn new(mut stream: TcpStream) -> Result<Self, io::Error> {
+        let mut buffer = [0; 1024];
+        stream.write("CONNECT".as_bytes());
+        let response = stream.read(&mut buffer).expect("Could Not Send Data").to_string();
+        let connect_msg = message::Message::parse(response.as_str()).unwrap();
+
+        match connect_msg {
+            message::Message::CONNECT(data) => {
+                let device = devices::IotDevice::new(&data);
+                Ok(DeviceConnection {
+                    device,
+                    stream,
+                })
+            },
+            _ => {
+                Err(io::Error::new(io::ErrorKind::Other, "LOL"))
+            }
+        }
+        
+    }
 
     pub fn listen(&mut self) {
         loop {

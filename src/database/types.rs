@@ -3,15 +3,15 @@ use serde_derive::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 
 pub enum InputType {
-    BOOLEAN,
+    TEXT,
     INTEGER,
-    FLOAT,
+    REAL,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 
 pub enum OutputType {
-    BOOLEAN,
+    TEXT,
     INTEGER,
-    FLOAT,
+    REAL,
 }
