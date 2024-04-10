@@ -1,19 +1,13 @@
 use std::io::{self, Read, Write};
 
 use std::net::{TcpListener, TcpStream};
-use std::os::windows::io::AsRawSocket;
-use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 
-use serde_derive::{Deserialize, Serialize};
 
-use crate::devices;
-use crate::database;
-use crate::message::{self, Message};
+use crate::database_handler::{DatabaseHandler, Table};
 
+use crate::messages::{Message, parse_profile, parse_update, ProfileMSG, UpdateMSG};
 pub struct IotServer {
-    ip: String,
-    port: u32,
     listener: TcpListener,
     handles: Vec<thread::JoinHandle<()>>,
 }
@@ -22,8 +16,6 @@ impl IotServer {
         let listener = TcpListener::bind(format!("{}:{}", &ip, &port))?;
 
         Ok(IotServer {
-            ip: ip.to_string(),
-            port,
             listener,
             handles: vec![],
         })
@@ -31,8 +23,7 @@ impl IotServer {
 
     pub fn start(&mut self) {
         println!(
-            "Starting IOT Server On IP:{} PORT:{}...",
-            self.ip, self.port
+            "Starting IOT Server...",
         );
         self.listen();
     }
@@ -43,30 +34,13 @@ impl IotServer {
                 Err(_) => {}
                 Ok(ok_stream) => {
                     let handle = thread::spawn(move || {
-                        let mut device =  DeviceConnection::new( ok_stream).unwrap();
+                        let mut device =  DeviceConnection::new( ok_stream);
                         device.listen();
                     });
                     self.handles.push(handle);
                 }
             }
         }
-    }
-
-    pub fn handle_request(mut stream: TcpStream) {
-        let mut buffer = [0; 1024]; // Buffer size
-        stream
-            .read(&mut buffer)
-            .expect("Failed To Read From Client"); // Reads stream data then puts it into the buffer
-
-        // Turns buffer data into string but handles messy data
-        let request = String::from_utf8_lossy(&buffer[..]).to_string();
-        let message = message::Message::parse(&request).expect("Could Not Process Message");
-
-        println!("Request Type {}", message.as_ref());
-        println!("Request Data {}", message.get_data());
-
-        let response = "Hello, Client".as_bytes();
-        stream.write(response).expect("Failed To Respond");
     }
 
     pub fn shutdown(&mut self) {
@@ -82,29 +56,40 @@ impl IotServer {
     }
 }
 
+/// This represents a connection between a device and the server.
+/// It contains data on the device and also stores the messaging stream
 struct DeviceConnection {
-    device: devices::IotDevice,
+    profile: ProfileMSG,
     stream: TcpStream,
 }
 impl DeviceConnection {
-    pub fn new(mut stream: TcpStream) -> Result<Self, io::Error> {
+    /// This function takes an input stream and then it uses that stream
+    /// to gain data on the device to then cache.
+    pub fn new(mut stream: TcpStream) -> Self {
         let mut buffer = [0; 1024];
-        //stream.write("CONNECT".as_bytes());
         stream.read(&mut buffer).expect("Could Not Read Data");
 
         let request = String::from_utf8_lossy(&buffer[..]).to_string();
-        let connect_msg = message::Message::parse(&request.as_str()).unwrap();
+        let connect_msg = Message::parse(&request.as_str()).unwrap();
+        
         println!("{:?}", connect_msg);
         match connect_msg {
-            message::Message::CONNECT(data) => {
-                let device = devices::IotDevice::new(&data);
-                Ok(DeviceConnection {
-                    device,
+            Message::PROFILE(profile) => {
+                let mut tables:Vec<Table> = vec![];
+                for sensor in &profile.sensors {
+                    tables.push(Table {
+                        name: sensor.label.clone(),
+                        data_type: sensor.data_type.clone(),
+                    })
+                }
+                DatabaseHandler::initialize_database(&profile.id, tables);
+                DeviceConnection {
+                    profile,
                     stream,
-                })
+                }
             },
             _ => {
-                Err(io::Error::new(io::ErrorKind::Other, "LOL"))
+                panic!("Connection Couldn't Be Made")
             }
         }
         
@@ -119,7 +104,7 @@ impl DeviceConnection {
                 Ok(n) => {
                     if n > 0 {
                         let request = String::from_utf8_lossy(&buffer[..]).to_string();
-                        self.handle_request(request);
+                        self.handle_request(Message::parse(&request).unwrap());
                     } else {
                         continue;
                     }
@@ -131,14 +116,16 @@ impl DeviceConnection {
         }
     }
 
-    pub fn handle_request(&mut self, request: String) {
-        let msg = message::Message::parse(&request.as_str()).unwrap();
-        match msg {
-            message::Message::UPDATE(entries) => {
-                self.device.update(entries);
+    pub fn handle_request(&mut self, request: Message) {
+        match request {
+            Message::UPDATE(entries) => {
+                println!("{:?}", entries);
+                for entry in entries.entries {
+                    DatabaseHandler::insert_into_database(&self.profile.id, entry.table, entry.data);
+                }                
             },
             _ => {
-                println!("TYPE:{:?} DATA:{:?}", msg.as_ref(), msg.get_data());
+                println!("TYPE:{:?} DATA:{:?}", request.as_ref(), request.to_string());
             }
         };
         

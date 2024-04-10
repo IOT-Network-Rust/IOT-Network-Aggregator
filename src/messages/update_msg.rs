@@ -1,4 +1,3 @@
-use crate::database::types::{InputType, OutputType};
 use serde_derive::{Deserialize, Serialize};
 use serde_json;
 

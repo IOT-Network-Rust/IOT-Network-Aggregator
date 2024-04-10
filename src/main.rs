@@ -1,14 +1,11 @@
 #![allow(unused)]
 mod config;
-mod database;
-mod devices;
-mod message;
+mod database_handler;
 mod server;
+mod messages;
 use std::process;
-use rusqlite::Connection;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let conf = config::load_config();
     let mut iot_server =
         server::IotServer::open(&conf.net.ip, conf.net.port).expect("Failed to start server");
