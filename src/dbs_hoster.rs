@@ -4,7 +4,8 @@ use std::path::PathBuf;
 
 async fn index(req: HttpRequest) -> Result<NamedFile> {
     let path: PathBuf = req.match_info().query("filename").parse().unwrap();
-    Ok(NamedFile::open(std::path::Path::new("dbs/").join(path))?)
+    let file_path = std::path::Path::new("dbs/").join(path);
+    Ok(NamedFile::open(file_path)?)
 }
 
 #[actix_web::main]
