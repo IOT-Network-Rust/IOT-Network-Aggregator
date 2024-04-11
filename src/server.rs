@@ -3,8 +3,8 @@ use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread;
 
-
-use crate::database_handler::{DatabaseHandler, Table};
+use crate::database_handler::{self, Table};
+use crate::device_catalog::{self, DeviceData};
 
 use crate::messages::{Message, parse_profile, parse_update, ProfileMSG, UpdateMSG};
 pub struct IotServer {
@@ -12,7 +12,7 @@ pub struct IotServer {
     handles: Vec<thread::JoinHandle<()>>,
 }
 impl IotServer {
-    pub fn open(ip: &str, port: u32) -> io::Result<Self> {
+    pub fn open(ip: &str, port: u16) -> io::Result<Self> {
         let listener = TcpListener::bind(format!("{}:{}", &ip, &port))?;
 
         Ok(IotServer {
@@ -25,6 +25,7 @@ impl IotServer {
         println!(
             "Starting IOT Server...",
         );
+        device_catalog::initialize_database();
         self.listen();
     }
 
@@ -71,7 +72,7 @@ impl DeviceConnection {
 
         let request = String::from_utf8_lossy(&buffer[..]).to_string();
         let connect_msg = Message::parse(&request.as_str()).unwrap();
-        
+
         println!("{:?}", connect_msg);
         match connect_msg {
             Message::PROFILE(profile) => {
@@ -82,7 +83,9 @@ impl DeviceConnection {
                         data_type: sensor.data_type.clone(),
                     })
                 }
-                DatabaseHandler::initialize_database(&profile.id, tables);
+                device_catalog::add_device(DeviceData::new(&profile.name, &profile.id));
+
+                database_handler::initialize_database(&profile.id, tables);
                 DeviceConnection {
                     profile,
                     stream,
@@ -121,7 +124,7 @@ impl DeviceConnection {
             Message::UPDATE(entries) => {
                 println!("{:?}", entries);
                 for entry in entries.entries {
-                    DatabaseHandler::insert_into_database(&self.profile.id, entry.table, entry.data);
+                    database_handler::insert_into_database(&self.profile.id, entry.table, entry.data);
                 }                
             },
             _ => {
