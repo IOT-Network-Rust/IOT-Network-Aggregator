@@ -6,7 +6,8 @@ use std::fs;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Net {
     pub ip: String,
-    pub port: u16,
+    pub port1: u16,
+    pub port2: u16,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

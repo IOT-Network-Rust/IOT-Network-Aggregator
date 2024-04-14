@@ -1,6 +1,8 @@
-use crate::database_handler;
+use super::database_handler;
 use rusqlite::Connection;
 use std::path::{Path, PathBuf};
+use super::util;
+use super::error;
 
 const DATABASE_NAME: &str = "device_catalog";
 const TABLE_NAME: &str = "devices";
@@ -20,12 +22,12 @@ impl DeviceData {
 }
 
 pub fn initialize_database() {
-    let tables = database_handler::get_tables(&DATABASE_NAME.to_string());
+    let path = util::get_database_path(&util::get_database_name(&DATABASE_NAME.to_string()));
+    let tables = util::get_database_tables(&path);
     match tables.get(0) {
         Some(_) => (),
         None => {
-            let path = Path::new(database_handler::DATA_FOLDER).join(format!("{}.db", DATABASE_NAME));
-            let conn = Connection::open(path).expect(database_handler::FAILURE_TO_OPEN);
+            let conn = Connection::open(path).expect(error::FAILURE_TO_OPEN);
 
             let command = format!(
                 "CREATE TABLE {} (
@@ -38,17 +40,17 @@ pub fn initialize_database() {
             );
 
             conn.execute(&command, [])
-                .expect(database_handler::FAILURE_TO_OPEN);
+                .expect(error::FAILURE_TO_OPEN);
 
             conn.close()
-                .expect(database_handler::FAILURE_TO_CLOSE);
+                .expect(error::FAILURE_TO_CLOSE);
         }
     }
 }
 
 pub fn add_device(device:DeviceData) {
-    let path = Path::new(database_handler::DATA_FOLDER).join(format!("{}.db", DATABASE_NAME));
-    let conn = Connection::open(path).expect(database_handler::FAILURE_TO_OPEN);
+    let path = util::get_database_path(&util::get_database_name(&DATABASE_NAME.to_string()));
+    let conn = Connection::open(path).expect(error::FAILURE_TO_OPEN);
 
     let command = format!("INSERT OR REPLACE INTO {} (name, device_id) VALUES (?1, ?2)", TABLE_NAME);
 
@@ -56,15 +58,15 @@ pub fn add_device(device:DeviceData) {
 
     println!("{}, {}", device.name, device.id);
     conn.execute(&command, (device.name, device.id))
-        .expect(database_handler::FAILURE_TO_INSERT);
+        .expect(error::FAILURE_TO_INSERT);
 
     conn.close()
-        .expect(database_handler::FAILURE_TO_CLOSE);
+        .expect(error::FAILURE_TO_CLOSE);
 }
 
 pub fn remove_device(device_id:u32) {
-    let path = Path::new(database_handler::DATA_FOLDER).join(format!("{}.db", DATABASE_NAME));
-    let conn = Connection::open(path).expect(database_handler::FAILURE_TO_OPEN);
+    let path = util::get_database_path(&util::get_database_name(&DATABASE_NAME.to_string()));
+    let conn = Connection::open(path).expect(error::FAILURE_TO_OPEN);
 
     let command = format!("DELETE FROM {} WHERE device_id={};", TABLE_NAME, device_id);
     conn.execute(&command, []);

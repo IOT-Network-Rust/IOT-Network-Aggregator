@@ -3,10 +3,10 @@ use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread;
 
-use crate::database_handler::{self, Table};
-use crate::device_catalog::{self, DeviceData};
+use crate::database::database_handler::{self, Table};
+use crate::database::device_catalog::{self, DeviceData};
 
-use crate::messages::{Message, parse_profile, parse_update, ProfileMSG, UpdateMSG};
+use super::messages::{Message, parse_profile, parse_update, ProfileMSG, UpdateMSG};
 pub struct IotServer {
     listener: TcpListener,
     handles: Vec<thread::JoinHandle<()>>,
@@ -26,6 +26,7 @@ impl IotServer {
             "Starting IOT Server...",
         );
         device_catalog::initialize_database();
+        println!("Started");
         self.listen();
     }
 
@@ -34,6 +35,7 @@ impl IotServer {
             match stream {
                 Err(_) => {}
                 Ok(ok_stream) => {
+                    println!("Received Connection");
                     let handle = thread::spawn(move || {
                         let mut device =  DeviceConnection::new( ok_stream);
                         device.listen();
