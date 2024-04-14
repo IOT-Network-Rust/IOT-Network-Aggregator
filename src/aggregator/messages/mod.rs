@@ -35,11 +35,14 @@ impl Message {
 
     pub fn to_string(&self) -> String {
         match self {
-            Message::PING => {"PING".to_string()},
-            Message::PROFILE(profile) => {format!("{:?}", profile)},
-            Message::UPDATE(update) => {format!("{:?}", update)},
-            Message::RESPONSE(string) => {string.clone()}
-
+            Message::PING => "PING".to_string(),
+            Message::PROFILE(profile) => {
+                format!("{:?}", profile)
+            }
+            Message::UPDATE(update) => {
+                format!("{:?}", update)
+            }
+            Message::RESPONSE(string) => string.clone(),
         }
     }
 }

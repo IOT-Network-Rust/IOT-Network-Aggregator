@@ -1,9 +1,9 @@
 use super::error;
 use chrono::{DateTime, Local};
 use rusqlite::Connection;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 
-const DATABASE_FOLDER:&str = "dbs";
+const DATABASE_FOLDER: &str = "dbs";
 
 /// Given a path to a database this function will return all
 /// tables within this database
@@ -30,7 +30,7 @@ pub fn get_current_time() -> DateTime<Local> {
     Local::now()
 }
 
-/// Generates the name for a database given 
+/// Generates the name for a database given
 /// a id for that item
 /// This algo assumes the id is unique
 pub fn get_database_name(id: &String) -> PathBuf {
@@ -40,7 +40,7 @@ pub fn get_database_name(id: &String) -> PathBuf {
 /// Returns the actual path of the database given a path
 pub fn get_database_path(path: &PathBuf) -> PathBuf {
     Path::new(DATABASE_FOLDER).join(path)
-}   
+}
 
 pub fn exists(path: &PathBuf) -> bool {
     Path::exists(path)

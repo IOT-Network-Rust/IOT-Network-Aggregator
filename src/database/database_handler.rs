@@ -1,10 +1,9 @@
-use serde_json::to_string;
 use super::util;
+use serde_json::to_string;
 
+use super::error;
 use rusqlite::Connection;
 use std::path;
-use super::error;
-
 
 /// Represents a table in a database
 /// Tables only store three data points
@@ -83,7 +82,7 @@ pub fn create_table(database_name: &String, table_name: String, value_type: Stri
 pub fn insert_into_database(database_name: &String, table_name: String, value: String) {
     let path = util::get_database_path(&util::get_database_name(database_name));
     let conn = Connection::open(path).expect(error::FAILURE_TO_OPEN);
-    
+
     let current_time = util::get_current_time();
     let command = format!("INSERT INTO {} (data, timestamp) VALUES (?, ?)", table_name);
 

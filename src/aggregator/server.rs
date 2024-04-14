@@ -6,7 +6,7 @@ use std::thread;
 use crate::database::database_handler::{self, Table};
 use crate::database::device_catalog::{self, DeviceData};
 
-use super::messages::{Message, parse_profile, parse_update, ProfileMSG, UpdateMSG};
+use super::messages::{parse_profile, parse_update, Message, ProfileMSG, UpdateMSG};
 pub struct IotServer {
     listener: TcpListener,
     handles: Vec<thread::JoinHandle<()>>,
@@ -22,9 +22,7 @@ impl IotServer {
     }
 
     pub fn start(&mut self) {
-        println!(
-            "Starting IOT Server...",
-        );
+        println!("Starting IOT Server...",);
         device_catalog::initialize_database();
         println!("Started");
         self.listen();
@@ -37,7 +35,7 @@ impl IotServer {
                 Ok(ok_stream) => {
                     println!("Received Connection");
                     let handle = thread::spawn(move || {
-                        let mut device =  DeviceConnection::new( ok_stream);
+                        let mut device = DeviceConnection::new(ok_stream);
                         device.listen();
                     });
                     self.handles.push(handle);
@@ -55,7 +53,9 @@ impl IotServer {
     }
 
     async fn shutdown_signal() {
-        tokio::signal::ctrl_c().await.expect("Failed to listen for Ctrl+C");
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Failed to listen for Ctrl+C");
     }
 }
 
@@ -78,7 +78,7 @@ impl DeviceConnection {
         println!("{:?}", connect_msg);
         match connect_msg {
             Message::PROFILE(profile) => {
-                let mut tables:Vec<Table> = vec![];
+                let mut tables: Vec<Table> = vec![];
                 for sensor in &profile.sensors {
                     tables.push(Table {
                         name: sensor.label.clone(),
@@ -88,16 +88,12 @@ impl DeviceConnection {
                 device_catalog::add_device(DeviceData::new(&profile.name, &profile.id));
 
                 database_handler::initialize_database(&profile.id, tables);
-                DeviceConnection {
-                    profile,
-                    stream,
-                }
-            },
+                DeviceConnection { profile, stream }
+            }
             _ => {
                 panic!("Connection Couldn't Be Made")
             }
         }
-        
     }
 
     pub fn listen(&mut self) {
@@ -126,13 +122,16 @@ impl DeviceConnection {
             Message::UPDATE(entries) => {
                 println!("{:?}", entries);
                 for entry in entries.entries {
-                    database_handler::insert_into_database(&self.profile.id, entry.table, entry.data);
-                }                
-            },
+                    database_handler::insert_into_database(
+                        &self.profile.id,
+                        entry.table,
+                        entry.data,
+                    );
+                }
+            }
             _ => {
                 println!("TYPE:{:?} DATA:{:?}", request.as_ref(), request.to_string());
             }
         };
-        
     }
 }

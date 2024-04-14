@@ -12,7 +12,7 @@ pub struct Net {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DB {
-    pub folder: String
+    pub folder: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

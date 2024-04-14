@@ -1,2 +1,2 @@
-pub mod server;
 mod messages;
+pub mod server;
