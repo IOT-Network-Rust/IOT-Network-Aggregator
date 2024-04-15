@@ -754,6 +754,7 @@ dependencies = [
  "actix-files",
  "actix-web",
  "chrono",
+ "derive_more",
  "local-ip-address",
  "rsa",
  "rusqlite",

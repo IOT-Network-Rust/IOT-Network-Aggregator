@@ -7,11 +7,14 @@ mod handlers;
 use std::process;
 use std::thread;
 
+const TCP_PORT: u16 = 8080;
+const API_PORT: u16 = 9000;
+
 fn main() {
     let conf = config::load_config();
     let ip_addr = conf.net.ip.clone();
-    thread::spawn(move || api::main());
-    let mut iot_server = aggregator::server::IotServer::open(&conf.net.ip, conf.net.port2)
+    thread::spawn(move || api::main(API_PORT));
+    let mut iot_server = aggregator::server::IotServer::open(&conf.net.ip, TCP_PORT)
         .expect("Failed to start server");
     iot_server.start();
 

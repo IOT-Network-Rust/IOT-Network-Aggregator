@@ -15,10 +15,11 @@ fn configure_routes(cfg: &mut web::ServiceConfig) {
 }
 
 #[actix_web::main]
-pub async fn main() -> std::io::Result<()> {
-    println!("Server Running On http://127.0.0.1:8080/");
+pub async fn main(port: u16) -> std::io::Result<()> {
+    let address = format!("127.0.0.1:{}", port);
+    println!("Server Running On http://{}/", address);
     HttpServer::new(|| App::new().configure(configure_routes))
-        .bind("127.0.0.1:8080")?
+        .bind(address)?
         .run()
         .await
 }

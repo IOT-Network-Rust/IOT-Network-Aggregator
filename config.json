@@ -1,8 +1,6 @@
 {
     "net":{
-        "ip":"self",
-        "port1":8080,
-        "port2":9000
+        "ip":"local"
     },
     "database":{
         "folder":"dbs"

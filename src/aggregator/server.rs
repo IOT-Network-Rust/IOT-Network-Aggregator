@@ -1,12 +1,9 @@
 use std::io::{self, Read, Write};
-
 use std::net::{TcpListener, TcpStream};
 use std::thread;
-
-use crate::database::database_handler::{self, Table};
-use crate::database::device_catalog::{self, DeviceData};
-
+use crate::database::{database_handler::{self, Table}, device_catalog::{self, DeviceData}};
 use super::messages::{parse_profile, parse_update, Message, ProfileMSG, UpdateMSG};
+
 pub struct IotServer {
     listener: TcpListener,
     handles: Vec<thread::JoinHandle<()>>,
