@@ -1,7 +1,7 @@
 use actix_web::{
-    error, get,
+    error,
     http::{header::ContentType, StatusCode},
-    App, HttpResponse,
+    HttpResponse,
 };
 use derive_more::{Display, Error};
 
@@ -12,9 +12,6 @@ pub enum APIError {
 
     #[display(fmt = "not found")]
     NotFound,
-
-    #[display(fmt = "timeout")]
-    Timeout,
 }
 
 impl error::ResponseError for APIError {
@@ -28,7 +25,6 @@ impl error::ResponseError for APIError {
         match *self {
             APIError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
             APIError::NotFound => StatusCode::NOT_FOUND,
-            APIError::Timeout => StatusCode::GATEWAY_TIMEOUT,
         }
     }
 }

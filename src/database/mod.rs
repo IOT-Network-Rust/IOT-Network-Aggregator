@@ -1,4 +1,4 @@
-pub mod database_handler;
-pub mod device_catalog;
+pub mod device_dbs;
+pub mod devices_db;
 mod error;
 mod util;

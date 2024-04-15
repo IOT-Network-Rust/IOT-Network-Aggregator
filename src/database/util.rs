@@ -8,7 +8,7 @@ const DATABASE_FOLDER: &str = "dbs";
 /// Given a path to a database this function will return all
 /// tables within this database
 pub fn get_database_tables(path: &PathBuf) -> Vec<String> {
-    let mut conn = Connection::open(path).expect(error::FAILURE_TO_OPEN);
+    let conn = Connection::open(path).expect(error::FAILURE_TO_OPEN);
 
     let mut stmt = conn
         .prepare("SELECT name FROM sqlite_master WHERE type='table'")
@@ -44,4 +44,8 @@ pub fn get_database_path(path: &PathBuf) -> PathBuf {
 
 pub fn exists(path: &PathBuf) -> bool {
     Path::exists(path)
+}
+
+pub fn open_connection(path: &PathBuf) -> rusqlite::Result<Connection> {
+    Connection::open(get_database_path(path))
 }

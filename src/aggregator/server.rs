@@ -1,8 +1,11 @@
+use super::messages::{parse_profile, parse_update, Message, ProfileMSG, UpdateMSG};
+use crate::database::{
+    device_dbs::{self, Table},
+    devices_db::{self, DeviceData},
+};
 use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread;
-use crate::database::{database_handler::{self, Table}, device_catalog::{self, DeviceData}};
-use super::messages::{parse_profile, parse_update, Message, ProfileMSG, UpdateMSG};
 
 pub struct IotServer {
     listener: TcpListener,
@@ -20,7 +23,7 @@ impl IotServer {
 
     pub fn start(&mut self) {
         println!("Starting IOT Server...",);
-        device_catalog::initialize_database();
+        devices_db::initialize_database();
         println!("Started");
         self.listen();
     }
@@ -82,9 +85,9 @@ impl DeviceConnection {
                         data_type: sensor.data_type.clone(),
                     })
                 }
-                device_catalog::add_device(DeviceData::new(&profile.name, &profile.id));
+                devices_db::add_device(DeviceData::new(&profile.name, &profile.id));
 
-                database_handler::initialize_database(&profile.id, tables);
+                device_dbs::initialize_database(&profile.id, tables);
                 DeviceConnection { profile, stream }
             }
             _ => {
@@ -119,11 +122,7 @@ impl DeviceConnection {
             Message::UPDATE(entries) => {
                 println!("{:?}", entries);
                 for entry in entries.entries {
-                    database_handler::insert_into_database(
-                        &self.profile.id,
-                        entry.table,
-                        entry.data,
-                    );
+                    device_dbs::insert_into_database(&self.profile.id, entry.table, entry.data);
                 }
             }
             _ => {

@@ -1,4 +1,3 @@
-use local_ip_address::local_ip;
 use serde_derive::{Deserialize, Serialize};
 use serde_json;
 use std::fs;
