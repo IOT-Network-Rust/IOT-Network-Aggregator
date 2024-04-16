@@ -11,6 +11,7 @@ pub async fn get_device_sensors(id: web::Path<String>) -> Result<impl Responder>
 }
 
 #[get("/devices/{id}/sensors/{name}/data")]
+// problem generating documentation
 /// Returns a list containing sensor data logs
 pub async fn get_device_sensor_data(
     id: web::Path<String>,
