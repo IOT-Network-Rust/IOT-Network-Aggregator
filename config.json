@@ -1,6 +1,8 @@
 {
     "net":{
-        "ip":"local"
+        "ip":"localhost",
+        "api_port":9000,
+        "iot_port":9070
     },
     "database":{
         "folder":"dbs"

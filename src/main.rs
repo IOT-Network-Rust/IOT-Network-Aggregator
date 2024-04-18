@@ -7,15 +7,24 @@ mod handlers;
 use std::process;
 use std::thread;
 
-const TCP_PORT: u16 = 9070;
-const API_PORT: u16 = 9000;
-
 fn main() {
+    // Loading conig
     let conf = config::load_config();
-    thread::spawn(move || api::main(API_PORT));
-    let mut iot_server = aggregator::server::IotServer::open(&conf.net.ip, TCP_PORT)
-        .expect("Failed to start server");
-    iot_server.start();
 
+    // Defining API addr
+    let api_addr = format!("{}:{}", conf.net.ip.clone(), conf.net.api_port);
+
+    // Defining IOT addr
+    let iot_addr = format!("{}:{}", conf.net.ip, conf.net.iot_port);
+
+    // Staring API server
+    thread::spawn(move || api::start(api_addr));
+
+    // Starting IOT Server
+    let mut iot_server =
+        aggregator::server::IotServer::open(iot_addr).expect("Server Failed To Start");
+    iot_server.listen();
+
+    // On exit
     process::exit(0);
 }
