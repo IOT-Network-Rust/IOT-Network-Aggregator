@@ -7,7 +7,7 @@ mod handlers;
 use std::process;
 use std::thread;
 
-const TCP_PORT: u16 = 8080;
+const TCP_PORT: u16 = 9070;
 const API_PORT: u16 = 9000;
 
 fn main() {

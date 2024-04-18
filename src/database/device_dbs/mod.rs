@@ -66,10 +66,10 @@ pub fn create_sensor_table(database_name: &String, table_name: String, value_typ
     let command = format!(
         "CREATE TABLE {} (
                 id    INTEGER PRIMARY KEY,
-                data  {} NOT NULL,
+                data  TEXT NOT NULL,
                 timestamp TEXT NOT NULL
             )",
-        table_name, value_type
+        table_name
     );
     conn.execute(command.as_str(), ());
 

@@ -10,6 +10,7 @@ use std::thread;
 pub struct IotServer {
     listener: TcpListener,
     handles: Vec<thread::JoinHandle<()>>,
+    address:String,
 }
 impl IotServer {
     pub fn open(ip: &str, port: u16) -> io::Result<Self> {
@@ -18,11 +19,12 @@ impl IotServer {
         Ok(IotServer {
             listener,
             handles: vec![],
+            address: format!("{}:{}", &ip, &port),
         })
     }
 
     pub fn start(&mut self) {
-        println!("Starting IOT Server...",);
+        println!("Starting IOT Server On {}", self.address);
         devices_db::initialize_database();
         println!("Started");
         self.listen();
@@ -97,25 +99,31 @@ impl DeviceConnection {
     }
 
     pub fn listen(&mut self) {
-        loop {
-            let mut buffer = [0; 1024]; // Buffer size
+    println!("Listening to connected device");
+    
+    // creating buffer to read message
+    loop {
+        let mut buffer: [u8; 1024] = [0; 1024];
 
-            // Waiting for Request from device
-            match self.stream.read(&mut buffer) {
-                Ok(n) => {
-                    if n > 0 {
-                        let request = String::from_utf8_lossy(&buffer[..]).to_string();
-                        self.handle_request(Message::parse(&request).unwrap());
+        match self.stream.read(&mut buffer) {
+            Ok(n) => {
+                if n > 0 {
+                    println!("Received a message");
+                    let request = String::from_utf8_lossy(&buffer[..]).to_string();
+                    if let Some(request_message) = Message::parse(&request) {
+                        self.handle_request(request_message);
                     } else {
-                        continue;
+                        println!("Failed to parse message: {}", request);
                     }
                 }
-                Err(_) => {
-                    continue;
-                }
-            };
+            }
+            Err(err) => {
+                println!("Error reading from stream: {}", err);
+                break; // Exit the loop on error
+            }
         }
     }
+}
 
     pub fn handle_request(&mut self, request: Message) {
         match request {

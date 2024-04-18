@@ -57,9 +57,6 @@ pub fn add_device(device: DeviceData) {
         TABLE_NAME
     );
 
-    println!("{}", command);
-
-    println!("{}, {}", device.name, device.id);
     conn.execute(&command, (device.name, device.id))
         .expect(error::FAILURE_TO_INSERT);
 

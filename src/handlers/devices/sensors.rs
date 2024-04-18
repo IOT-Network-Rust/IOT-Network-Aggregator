@@ -14,12 +14,15 @@ pub async fn get_device_sensors(id: web::Path<String>) -> Result<impl Responder>
 // problem generating documentation
 /// Returns a list containing sensor data logs
 pub async fn get_device_sensor_data(
-    id: web::Path<String>,
-    name: web::Path<String>,
+    param: web::Path<(String, String)>,
 ) -> Result<impl Responder> {
-    let entries = device_dbs::services::get_device_sensor_data(&id, &name);
-    Ok(web::Json(entries))
+    let id = &param.0;
+    let name = &param.1;
 
+    match device_dbs::services::get_device_sensor_data(id, name) {
+        Ok(data) => Ok(web::Json(data)),
+        Err(_) => Err(APIError::InternalError.into()),
+    }
 }
 
 #[get("/devices/{id}/sensors/{name}/data/{range}")]
