@@ -14,6 +14,12 @@ pub enum APIError {
 
     #[display(fmt = "not found")]
     NotFound,
+
+    #[display(fmt = "invalid permissions")]
+    InvalidPermission,
+
+    #[display(fmt = "incomplete")]
+    Incomplete,
 }
 
 impl error::ResponseError for APIError {
@@ -29,6 +35,8 @@ impl error::ResponseError for APIError {
         match *self {
             APIError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
             APIError::NotFound => StatusCode::NOT_FOUND,
+            APIError::InvalidPermission => StatusCode::FORBIDDEN,
+            APIError::Incomplete => StatusCode::NOT_FOUND,
         }
     }
 }

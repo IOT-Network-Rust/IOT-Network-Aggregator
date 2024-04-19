@@ -1,4 +1,5 @@
 use crate::handlers;
+use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
 
 /// Function that adds routes to api services
@@ -22,8 +23,15 @@ pub async fn start(addr: String) -> std::io::Result<()> {
     println!("Server Running On http://{}/", addr);
 
     // Starting server
-    HttpServer::new(|| App::new().configure(configure_routes))
-        .bind(addr)?
-        .run()
-        .await
+    HttpServer::new(|| {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000") // Allowing specific origin
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"]) // Allowing specific methods
+            .allowed_headers(vec!["api_key", "user_id"]) // Allowing specific headers
+            .max_age(3600); // Setting max age for preflight requests;
+        App::new().wrap(cors).configure(configure_routes)
+    })
+    .bind(addr)?
+    .run()
+    .await
 }

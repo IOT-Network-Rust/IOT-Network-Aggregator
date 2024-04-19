@@ -1,7 +1,6 @@
 use super::messages::{Message, ProfileMSG};
 use crate::database::{
     device_database,
-    device_dbs::{self, Table},
     devices_db::{self, DeviceData},
 };
 use std::io::{Error, ErrorKind, Read, Result};
