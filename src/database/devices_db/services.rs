@@ -38,5 +38,5 @@ pub fn get_device(id: String) -> Result<DeviceData, rusqlite::Error> {
 pub fn remove_device(device_id: u32) {
     let conn = util::open_connection(&util::get_database_name(&DATABASE_NAME.to_string())).unwrap();
     let command = format!("DELETE FROM {} WHERE device_id={};", TABLE_NAME, device_id);
-    conn.execute(&command, []);
+    conn.execute(&command, []).unwrap();
 }

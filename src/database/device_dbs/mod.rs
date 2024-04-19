@@ -1,19 +1,9 @@
 use super::util;
-use serde_json::to_string;
-
 use super::error;
 use rusqlite::Connection;
-use std::path;
-mod entry;
 pub mod services;
-/// Represents a table in a database
-/// Tables only store three data points
-/// ID
-/// Value
-/// Time
-///
-/// You are able to choose what the Values
-/// type will be
+
+
 pub struct Table {
     pub name: String,
     pub data_type: String,
@@ -31,7 +21,7 @@ impl Table {
 /// Loads up a data base
 /// If there are any tables that have not been created
 /// it will create them
-pub fn initialize_database(database_name: &String, mut tables: Vec<Table>) {
+pub fn initialize_database(database_name: &String, tables: Vec<Table>) {
     let path = util::get_database_path(&util::get_database_name(database_name));
     let exists: bool = util::exists(&path);
 
@@ -71,7 +61,7 @@ pub fn create_sensor_table(database_name: &String, table_name: String, value_typ
             )",
         table_name
     );
-    conn.execute(command.as_str(), ());
+    conn.execute(command.as_str(), ()).unwrap();
 
     conn.close().expect(error::FAILURE_TO_CLOSE);
 }

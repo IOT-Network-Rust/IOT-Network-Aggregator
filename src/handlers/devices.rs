@@ -9,18 +9,28 @@ use actix_web::{get, web, Responder, Result};
 /// Returns a list of json objects representing
 /// Devices
 pub async fn devices() -> Result<impl Responder> {
+    // Matching result
     match devices_db::services::get_all_devices() {
-        Ok(objects) => Ok(web::Json(objects)),
-        Err(_) => Err(APIError::InternalError.into()),
+        Ok(object) => Ok(web::Json(object)),
+        Err(e) => {
+            println!("There was an error {}", e);
+            Err(APIError::InternalError.into())
+        }
     }
 }
 
 #[get("/devices/{id}")]
 /// Returns object about a single device
 pub async fn get_device(id: web::Path<String>) -> Result<impl Responder> {
+    // Getting args
     let id = id.into_inner();
+
+    // Matching result
     match devices_db::services::get_device(id) {
         Ok(object) => Ok(web::Json(object)),
-        Err(_) => Err(APIError::NotFound.into()),
+        Err(e) => {
+            println!("There was an error {}", e);
+            Err(APIError::NotFound.into())
+        }
     }
 }

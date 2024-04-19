@@ -1,7 +1,5 @@
-use actix_web::{App, HttpRequest, HttpServer, Result};
-
 use crate::handlers;
-use actix_web::web;
+use actix_web::{web, App, HttpServer};
 
 /// Function that adds routes to api services
 fn configure_routes(cfg: &mut web::ServiceConfig) {
