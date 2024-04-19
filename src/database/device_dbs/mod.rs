@@ -72,7 +72,7 @@ pub fn insert_into_database(database_name: &String, table_name: String, value: S
     let conn = util::open_connection(&util::get_database_name(database_name)).unwrap();
 
     let current_time = util::get_current_time();
-    let command = format!("INSERT INTO {} (data, timestamp) VALUES (?, ?)", table_name);
+    let command: String = format!("INSERT INTO {} (data, timestamp) VALUES (?, ?)", table_name);
     conn.execute(&command, &[&value, &current_time.to_rfc3339()])
         .expect(error::FAILURE_TO_INSERT);
 
