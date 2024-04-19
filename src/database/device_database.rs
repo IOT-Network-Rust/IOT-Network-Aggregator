@@ -1,10 +1,11 @@
 //! Holds data about device
-//! 
-
+//!
 
 use failure::{format_err, Error};
 use rusqlite;
+use serde_derive::{Deserialize, Serialize};
 
+#[derive(Deserialize, Serialize)]
 /// Represents the types that a device sensor entry can be assigned
 pub enum DataType {
     NUMBER,
@@ -30,11 +31,13 @@ impl DataType {
     }
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct SensorTable {
     name: String,
     data_type: DataType,
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct DataEntry {
     value: String,
     time: String,
