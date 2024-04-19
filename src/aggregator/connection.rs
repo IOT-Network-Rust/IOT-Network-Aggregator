@@ -1,10 +1,11 @@
 use super::messages::{Message, ProfileMSG};
-use std::net::TcpStream;
-use std::io::{Read, Result, Error, ErrorKind};
 use crate::database::{
+    device_database,
     device_dbs::{self, Table},
     devices_db::{self, DeviceData},
 };
+use std::io::{Error, ErrorKind, Read, Result};
+use std::net::TcpStream;
 
 /// This represents a connection between a device and the server.
 /// It contains data on the device and also stores the messaging stream
@@ -18,29 +19,31 @@ impl DeviceConnection {
     pub fn new(mut stream: TcpStream) -> Result<Self> {
         // Getting profile message that always comes with first stream
         let request = Self::read(&mut stream)?; // Throws error if unable to read
-        let connect_msg: Message = Message::parse(&request.as_str())
-            .expect("Invalid request");
+        let connect_msg: Message = Message::parse(&request.as_str()).expect("Invalid request");
 
         // Checking if message is of correct type
         if let Message::PROFILE(profile) = connect_msg {
             // Gathering tables from message
-            let mut tables: Vec<Table> = vec![];
+            let mut tables: Vec<device_database::SensorTable> = vec![];
             for sensor in &profile.sensors {
-                tables.push(Table {
-                    name: sensor.label.clone(),
-                    data_type: sensor.data_type.clone(),
-                })
+                tables.push(device_database::SensorTable::new(
+                    &sensor.label,
+                    &sensor.data_type,
+                ));
             }
 
             // Adding device to device_catalog db
             devices_db::add_device(DeviceData::new(&profile.name, &profile.id));
 
             // Initializing device db
-            device_dbs::initialize_database(&profile.id, tables);
+            device_database::init_database(&profile.id, &tables);
 
             Ok(DeviceConnection { profile, stream })
         } else {
-            Err(Error::new(ErrorKind::ConnectionRefused, "Device could not connect"))
+            Err(Error::new(
+                ErrorKind::ConnectionRefused,
+                "Device could not connect",
+            ))
         }
     }
 
@@ -65,7 +68,9 @@ impl DeviceConnection {
         loop {
             let mut buffer: [u8; 1024] = [0; 1024];
             if let Ok(n) = self.stream.read(&mut buffer) {
-                if n == 0 {continue} // Don't except empty messages
+                if n == 0 {
+                    continue;
+                } // Don't except empty messages
 
                 println!("Received a message");
                 let request = String::from_utf8_lossy(&buffer[..]).to_string();
@@ -74,7 +79,6 @@ impl DeviceConnection {
                 } else {
                     println!("Failed to parse message: {}", request);
                 }
-                
             } else {
                 println!("Error reading from stream");
                 break; // Exit the loop on error
@@ -90,13 +94,18 @@ impl DeviceConnection {
                 println!("{:?}", entries);
 
                 // Iterate over update requests and insert them in db
+                let conn = device_database::open_connection(&String::from("dbs"), &self.profile.id)
+                    .unwrap();
+
                 for entry in entries.entries {
-                    device_dbs::insert_into_database(
-                        &self.profile.id, 
-                        entry.table, 
-                        entry.data
-                    );
+                    device_database::insert_value(
+                        &conn,
+                        &entry.table,
+                        &device_database::DataEntry::new(entry.data),
+                    )
+                    .unwrap();
                 }
+                conn.close().unwrap();
             }
             Message::PING => {
                 println!("Yes im here")

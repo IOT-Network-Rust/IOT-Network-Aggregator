@@ -1,5 +1,5 @@
 use super::super::errors::APIError;
-use crate::database::{device_dbs, devices_db};
+use crate::database::{device_dbs, devices_db, device_database};
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result};
 
 #[get("/devices/{id}/sensors")]
@@ -7,7 +7,8 @@ use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result};
 /// Return type
 pub async fn get_device_sensors(id: web::Path<String>) -> Result<impl Responder> {
     // Matching result
-    match device_dbs::services::get_device_sensors(&id) {
+    let conn = device_database::open_connection(&String::from("dbs"), &id).unwrap();
+    match device_database::get_tables(&conn) {
         Ok(objects) => Ok(web::Json(objects)),
         Err(e) => {
             println!("There was an error {}", e);
@@ -25,7 +26,8 @@ pub async fn get_device_sensor_data(param: web::Path<(String, String)>) -> Resul
     let name = &param.1;
 
     // Matching result
-    match device_dbs::services::get_device_sensor_data(id, name) {
+    let conn = device_database::open_connection(&String::from("dbs"), &id).unwrap();
+    match device_database::get_table_entries(&conn, name) {
         Ok(object) => Ok(web::Json(object)),
         Err(e) => {
             println!("There was an error {}", e);

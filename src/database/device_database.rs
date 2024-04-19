@@ -1,11 +1,15 @@
 //! Holds data about device
 //!
 
+use std::any;
+
 use failure::{format_err, Error};
 use rusqlite;
 use serde_derive::{Deserialize, Serialize};
+use chrono::Local;
 
-#[derive(Deserialize, Serialize)]
+
+#[derive(Deserialize, Serialize, PartialEq, Clone, Debug)]
 /// Represents the types that a device sensor entry can be assigned
 pub enum DataType {
     NUMBER,
@@ -13,10 +17,10 @@ pub enum DataType {
 }
 
 impl DataType {
-    pub fn from_sql_type(sql_type: String) -> Result<Self, Error> {
+    pub fn from_sql_type(sql_type: &String) -> Result<Self, Error> {
         let number_type = String::from("REAL");
         let text_type = String::from("TEXT");
-        match sql_type {
+        match sql_type.to_uppercase() {
             number_type => Ok(DataType::NUMBER),
             text_type => Ok(DataType::FILE),
             _ => Err(format_err!("Datatype was unexpected")),
@@ -31,10 +35,26 @@ impl DataType {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct SensorTable {
-    name: String,
-    data_type: DataType,
+    pub name: String,
+    pub data_type: DataType,
+}
+
+impl PartialEq for  SensorTable {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.data_type == other.data_type
+    }
+}
+
+impl SensorTable {
+    pub fn new(name: &String, data_type: &String) -> Self {
+        let data_type = DataType::from_sql_type(data_type).unwrap();
+        SensorTable {
+            name: name.clone(),
+            data_type,
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize)]
@@ -43,9 +63,34 @@ pub struct DataEntry {
     time: String,
 }
 
+impl DataEntry {
+    pub fn new(value: String) -> Self {
+        let time = get_current_time();
+        DataEntry {
+            value,
+            time,
+        }
+    }
+}
+
+/// Returns string representing current time
+pub fn get_current_time() -> String {
+    Local::now().to_rfc3339()
+}
+
 /// Returns database name structure given device id
-pub fn to_database_name(id: String) -> String {
-    format!("{}.sqlite3", id)
+pub fn to_database_name(id: &String) -> String {
+    format!("{}.db", id)
+}
+
+/// Creates a connection to a database
+pub fn open_connection(folder: &String, id: &String) -> Result<rusqlite::Connection, Error> {
+    let path = std::path::Path::new(folder).join(&to_database_name(id));
+    if let Ok(conn) = rusqlite::Connection::open(path) {
+        Ok(conn)
+    } else {
+        Err(format_err!("There was an error starting database connection"))
+    }
 }
 
 /// Creates a table within sqlite3 database
@@ -60,7 +105,7 @@ pub fn create_table(conn: &rusqlite::Connection, table: &SensorTable) -> Result<
         table.name,
         table.data_type.as_sql_type()
     );
-
+    println!("{}", command);
     // Checking for execution error
     if let Err(e) = conn.execute(command.as_str(), ()) {
         return Err(format_err!("There was a problem creating table"));
@@ -72,14 +117,14 @@ pub fn create_table(conn: &rusqlite::Connection, table: &SensorTable) -> Result<
 /// Inserts a data point into sqlite3 database table
 pub fn insert_value(
     conn: &rusqlite::Connection,
-    table_name: String,
+    table_name: &String,
     value: &DataEntry,
 ) -> Result<(), Error> {
     // Structuring command
     let command: String = format!("INSERT INTO {} (data, timestamp) VALUES (?, ?)", table_name);
 
     // Checking for execution error
-    if let Err(e) = conn.execute(&command, [&value.value, &value.time]) {
+    if let Err(e) = conn.execute(&command, &[&value.value, &value.time]) {
         return Err(format_err!("There was a problem inserting into table"));
     }
 
@@ -95,16 +140,12 @@ pub fn get_table_data_type(
     let command = format!("SELECT typeof(data) FROM {}", table_name);
     let mut stmt = conn.prepare(&command).unwrap();
 
-    let mut rows = stmt.query([]).unwrap();
+    let mut row = stmt.query_row([], |row| {
+        let data_type: String = row.get::<usize, String>(0).unwrap().to_string();
+        Ok(DataType::from_sql_type(&data_type).unwrap())
+    });
 
-    // Extract the first row (if any)
-    if let Some(row) = rows.next().unwrap() {
-        // Extract the first value (type of "data" column)
-        let sql_type: String = row.get(0).unwrap();
-        Ok(DataType::from_sql_type(sql_type).unwrap())
-    } else {
-        Err(format_err!("Could not find type"))
-    }
+    Ok(row.unwrap())
 }
 
 /// Gets tables within device database
@@ -140,11 +181,22 @@ pub fn get_table_entries(
     };
     let mut stmt = stmt.unwrap();
 
+    let table_type = get_table_data_type(conn, table_name).unwrap();
+
     // Creating iterator over table
     let entry_iter = stmt.query_map([], |row| {
+        let value: String = match table_type {
+            DataType::NUMBER => {
+                row.get::<usize, f64>(0)?.to_string()
+            }
+            DataType::FILE => {
+                row.get::<usize, String>(0)?
+            }
+        };
+        let time:String = row.get::<usize, String>(1)?;
         Ok(DataEntry {
-            value: row.get(0)?,
-            time: row.get(1)?,
+            value,
+            time,
         })
     })?;
 
@@ -156,4 +208,32 @@ pub fn get_table_entries(
     }
 
     Ok(entries)
+}
+
+
+pub fn init_database(id: &String, tables: &Vec<SensorTable>) -> Result<(), Error> {
+    let conn = open_connection(&String::from("dbs"), id)?;
+    
+    let existing_tables = get_tables(&conn).unwrap();
+
+    let mut tables_to_create = vec![];
+    for table in tables {
+        if !existing_tables.contains(&table) {
+            tables_to_create.push(table);
+        }
+    }
+
+    for table in tables_to_create.clone() {
+        create_table(&conn, &table);
+    }
+
+    // Add one database entry so we can access typing in the future
+    for table in tables_to_create {
+        let value = String::from(if table.data_type == DataType::NUMBER {"0"} else {""});
+        insert_value(&conn, &table.name, &DataEntry::new(value));
+    }
+
+    conn.close().unwrap();
+
+    Ok(())
 }
