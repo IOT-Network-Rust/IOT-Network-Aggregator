@@ -157,6 +157,9 @@ fn get_entry_by_user_id(user_id: &String) -> Result<Entry, Error> {
 pub fn create_user(user_id: &String, permission_level: UserPermission) {
     let random_key = generate_random_api_key();
 
+    //println!("USER ID {}", user_id);
+    //println!("API KEY {}", random_key);
+
     let hashed_api_key = hash(random_key, DEFAULT_COST).unwrap();
     let entry = Entry {
         user_id: user_id.clone(),
@@ -173,7 +176,7 @@ pub fn validate_credentials(
     api_key: &String,
     permission_needed: Permissions,
 ) -> Result<bool, Error> {
-    //create_user(&generate_random_api_key(), UserPermission::Admin);
+    create_user(&generate_random_api_key(), UserPermission::Admin);
     let entry = get_entry_by_user_id(user_id)?;
 
     // Check if api key is a valid api key for user
