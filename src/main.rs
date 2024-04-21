@@ -3,7 +3,6 @@ mod aggregator;
 mod api;
 mod config;
 mod database;
-mod handlers;
 use std::process;
 use std::thread;
 

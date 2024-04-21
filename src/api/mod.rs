@@ -1,16 +1,19 @@
-use crate::handlers;
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
+mod init;
+mod security;
+mod errors;
+mod handlers;
 
 /// Function that adds routes to api services
 fn configure_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
-            .service(handlers::devices::devices)
-            .service(handlers::devices::get_device)
-            .service(handlers::devices::inputs::get_device_inputs)
-            .service(handlers::devices::sensors::get_device_sensors)
-            .service(handlers::devices::sensors::get_device_sensor_data),
+            .service(handlers::devices)
+            .service(handlers::get_device)
+            .service(handlers::inputs::get_device_inputs)
+            .service(handlers::sensors::get_device_sensors)
+            .service(handlers::sensors::get_device_sensor_data),
     );
 }
 
@@ -21,6 +24,8 @@ fn configure_routes(cfg: &mut web::ServiceConfig) {
 /// Expect data that is received to be in JSON format
 pub async fn start(addr: String) -> std::io::Result<()> {
     println!("Server Running On http://{}/", addr);
+
+    init::init();
 
     // Starting server
     HttpServer::new(|| {

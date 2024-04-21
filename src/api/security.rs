@@ -1,5 +1,5 @@
-use crate::database::api_keys::validate_credentials;
-pub use crate::database::api_keys::Permissions;
+use crate::database::api_keys_sqlite::validate_credentials;
+pub use crate::database::api_keys_sqlite::Permissions;
 use actix_web::HttpRequest;
 
 pub fn validate_request(req: HttpRequest, required_security: Permissions) -> bool {
