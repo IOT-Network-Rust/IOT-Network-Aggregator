@@ -1,14 +1,15 @@
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
-mod init;
-mod security;
 mod errors;
 mod handlers;
+mod security;
 
 /// Function that adds routes to api services
 fn configure_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
+            .service(handlers::login)
+            .service(handlers::validate_token)
             .service(handlers::devices)
             .service(handlers::get_device)
             .service(handlers::inputs::get_device_inputs)
@@ -25,14 +26,12 @@ fn configure_routes(cfg: &mut web::ServiceConfig) {
 pub async fn start(addr: String) -> std::io::Result<()> {
     println!("Server Running On http://{}/", addr);
 
-    init::init();
-
     // Starting server
     HttpServer::new(|| {
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000") // Allowing specific origin
             .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"]) // Allowing specific methods
-            .allowed_headers(vec!["api_key", "user_id"]) // Allowing specific headers
+            .allowed_headers(vec!["api_key", "user_id", "auth_token"]) // Allowing specific headers
             .max_age(3600); // Setting max age for preflight requests;
         App::new().wrap(cors).configure(configure_routes)
     })

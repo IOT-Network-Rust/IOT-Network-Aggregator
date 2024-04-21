@@ -89,7 +89,8 @@ pub fn init_database() -> Result<(), Error> {
 
     // Executing command
     if let Err(e) = conn.execute(command, ()) {
-        return Err(format_err!("There was a problem creating table {}", e));
+        //return Err(format_err!("There was a problem creating table {}", e));
+        return Ok(());
     }
 
     conn.close().unwrap();
@@ -176,7 +177,7 @@ pub fn validate_credentials(
     api_key: &String,
     permission_needed: Permissions,
 ) -> Result<bool, Error> {
-    create_user(&generate_random_api_key(), UserPermission::Admin);
+    //create_user(&generate_random_api_key(), UserPermission::Admin);
     let entry = get_entry_by_user_id(user_id)?;
 
     // Check if api key is a valid api key for user
@@ -188,4 +189,15 @@ pub fn validate_credentials(
         Permissions::Read => Ok(entry.permission.read_status()),
         Permissions::Write => Ok(entry.permission.write_status()),
     }
+}
+
+pub fn validate_and_get_permission(user_id: &String,
+    api_key: &String) -> Result<UserPermission, Error> {
+    let entry = get_entry_by_user_id(user_id)?;
+
+    if !verify(api_key, &entry.hashed_api_key)? {
+        return Err(format_err!("Invalid"));
+    }
+
+    Ok(entry.permission)
 }

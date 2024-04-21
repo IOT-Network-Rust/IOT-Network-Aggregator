@@ -7,6 +7,9 @@ use std::process;
 use std::thread;
 
 fn main() {
+    // init databases
+    database::init();
+    
     // Loading conig
     let conf = config::load_config();
 

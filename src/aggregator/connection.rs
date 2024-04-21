@@ -1,7 +1,7 @@
 use super::messages::{Message, ProfileMSG};
 use crate::database::{
     device_database,
-    devices_db::{self, DeviceData},
+    catalog_database::{self, DeviceData},
 };
 use std::io::{Error, ErrorKind, Read, Result};
 use std::net::TcpStream;
@@ -32,7 +32,7 @@ impl DeviceConnection {
             }
 
             // Adding device to device_catalog db
-            devices_db::add_device(DeviceData::new(&profile.name, &profile.id));
+            catalog_database::add_device(DeviceData::new(&profile.name, &profile.id));
 
             // Initializing device db
             device_database::init_database(&profile.id, &tables);

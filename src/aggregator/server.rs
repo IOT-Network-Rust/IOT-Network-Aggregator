@@ -2,7 +2,6 @@ use super::connection::DeviceConnection;
 use std::io;
 use std::net::TcpListener;
 use std::thread;
-use crate::database::devices_db;
 
 /// IOT server
 pub struct IotServer {
@@ -29,8 +28,6 @@ impl IotServer {
     pub fn listen(&mut self) {
         println!("Starting IOT Server On: {}", self.addr);
         
-        devices_db::initialize_database();
-
         // Creating listener for server shutdown
         self.shutdown_signal(); // type: ignore
 

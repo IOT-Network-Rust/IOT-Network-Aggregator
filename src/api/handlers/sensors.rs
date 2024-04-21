@@ -1,14 +1,14 @@
 use super::super::errors::APIError;
-use crate::database::{devices_db, device_database};
+use crate::database::{catalog_database, device_database};
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result, HttpRequest};
-use super::super::security::{validate_request, Permissions};
+use super::super::security::{validate_request, Permissions, validate_with_token};
 
 #[get("/devices/{id}/sensors")]
 /// Returns list of sensors that object has with their
 /// Return type
 pub async fn get_device_sensors(id: web::Path<String>, req: HttpRequest) -> Result<impl Responder> {
     // Check if permissions are correct
-    if !validate_request(req, Permissions::Read) {return Err(APIError::InvalidPermission.into())}
+    if !validate_with_token(req, Permissions::Read).unwrap() {return Err(APIError::InvalidPermission.into())}
 
     // Fetching data
     let conn = device_database::open_connection(&String::from("dbs"), &id).unwrap();
@@ -26,7 +26,7 @@ pub async fn get_device_sensors(id: web::Path<String>, req: HttpRequest) -> Resu
 /// Returns a list containing sensor data logs
 pub async fn get_device_sensor_data(param: web::Path<(String, String)>, req: HttpRequest) -> Result<impl Responder> {
     // Check if permissions are correct
-    if !validate_request(req, Permissions::Read) {return Err(APIError::InvalidPermission.into())}
+    if !validate_with_token(req, Permissions::Read).unwrap() {return Err(APIError::InvalidPermission.into())}
 
     // Getting args
     let id = &param.0;
@@ -51,7 +51,7 @@ pub async fn get_device_sensor_data_ranged(
     req: HttpRequest
 ) -> Result<impl Responder> {
     // Check if permissions are correct
-    if !validate_request(req, Permissions::Read) {return Err(APIError::InvalidPermission.into());}
+    if !validate_with_token(req, Permissions::Read).unwrap() {return Err(APIError::InvalidPermission.into());}
 
     // Getting args
     let id = &params.0;
